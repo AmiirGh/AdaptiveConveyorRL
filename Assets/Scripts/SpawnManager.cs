@@ -19,7 +19,7 @@ public class SpawnManager : MonoBehaviour
         if (timer >= 2.0f)
         {
             timer = 0;
-            Instantiate(cubePrefab, instantiatePos, Quaternion.identity);
+            //Instantiate(cubePrefab, instantiatePos, Quaternion.identity);
         }
         
     }
