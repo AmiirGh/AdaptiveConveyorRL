@@ -1228,6 +1228,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 684635756}
+  - component: {fileID: 684635757}
   m_Layer: 0
   m_Name: Feedbacks
   m_TagString: Untagged
@@ -1253,6 +1254,19 @@ Transform:
   - {fileID: 2052110335}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &684635757
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 684635755}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92fb99a3d4de752489e8488fde39918d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  feedbackIntensity: 0
 --- !u!1 &713717592
 GameObject:
   m_ObjectHideFlags: 0
@@ -2731,7 +2745,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   visualFeedback: {fileID: 596351851}
-  feedbacks: {fileID: 0}
+  feedbacks: {fileID: 684635757}
 --- !u!135 &1657311118
 SphereCollider:
   m_ObjectHideFlags: 0
