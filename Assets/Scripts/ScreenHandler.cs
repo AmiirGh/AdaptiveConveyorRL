@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI; // Required for using UI components like Image
@@ -18,9 +20,16 @@ public class ScriptHandler : MonoBehaviour
     private List<string> colorTextList = new List<string> { "red", "green", "blue", "yellow"};
     private List<Color> colorColorList = new List<Color> { Color.red, Color.blue, Color.green, Color.yellow, Color.white};
 
+
+    private int vHColorTextIndex = 0;
+    private int vHColorColorIndex = 0;
+    private List<int> vHColorTextIndexes  = new List<int>();
+    private List<int> vHColorColorIndexes = new List<int>();
+    private List<int> vHOperatorResponses = new List<int>();
+
     void Start()
     {
-        ColorVisionHeavyChoices();
+        ColorVHChoices();
         VisionHeavy();
     }
 
@@ -43,35 +52,69 @@ public class ScriptHandler : MonoBehaviour
         audioHeavy  = 2,
         both        = 3
     }
-
+    private enum VHColorTextIndexEnum
+    {
+        red = 0,
+        green = 1,
+        blue = 2,
+        yellow = 3,
+        
+    }
+    private enum vHOperatorResponsesEnum
+    {
+        up = 0,
+        right = 1,
+        down = 2,
+        left = 3,
+        notChosen = -1,
+        undefined = -2
+    }
 
     private void VisionHeavy()
     {
         waitingForChoice = true;
         choiceTimer = 0f;
-        string text = colorTextList[Random.Range(0, colorTextList.Count)];
-        VHText.text  = colorTextList [Random.Range(0, colorTextList.Count)];
-        VHText.color = colorColorList[Random.Range(0, colorTextList.Count)];
+        vHColorTextIndexes.Add(Random.Range(0, colorTextList.Count));
+        vHColorColorIndexes.Add(Random.Range(0, colorColorList.Count));
+        VHText.text  = colorTextList [vHColorTextIndexes[vHColorTextIndexes.Count - 1]];
+        VHText.color = colorColorList[vHColorColorIndexes[vHColorColorIndexes.Count - 1]];
     }
     private void HandleVisionHeavy()
     {
         if (!waitingForChoice) return;
+
         choiceTimer += Time.deltaTime;
-        Vector2 rightStick = Vector2.zero;
         Vector2 thumbStickInput = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick);
         Debug.Log($"thumbStickInput: {thumbStickInput}");
-        if (thumbStickInput.x > 0.5f && startNewTrialEnabled)
-        {
+        if (thumbStickInput.magnitude > 0.6f && startNewTrialEnabled)
+        { // operator showed their choice (moved the thumbstic)
+            waitingForChoice = false;
+
             startNewTrialEnabled = false;
             StartCoroutine(ReEnableNewTrial());
-            waitingForChoice = false;
+            GetOperatorResponse(thumbStickInput); // Check if the operator chose the correct choice
             VisionHeavy();
         }
         else if (choiceTimer >= 5f)
         {
             waitingForChoice = false;
+            vHOperatorResponses.Add((int)vHOperatorResponsesEnum.notChosen);
             VisionHeavy();
         }
+    }
+
+    private void GetOperatorResponse(Vector2 thumbStickInput)
+    {
+        int operatorResponse;
+
+        if      (thumbStickInput.y > 0.6f)  { vHOperatorResponses.Add((int)vHOperatorResponsesEnum.up);    operatorResponse = (int)VHColorTextIndexEnum.red;   }
+        else if (thumbStickInput.x > 0.6f)  { vHOperatorResponses.Add((int)vHOperatorResponsesEnum.right); operatorResponse = (int)VHColorTextIndexEnum.green; }
+        else if (thumbStickInput.y < -0.6f) { vHOperatorResponses.Add((int)vHOperatorResponsesEnum.down);  operatorResponse = (int)VHColorTextIndexEnum.blue;  }
+        else if (thumbStickInput.x < -0.6f) { vHOperatorResponses.Add((int)vHOperatorResponsesEnum.left);  operatorResponse = (int)VHColorTextIndexEnum.yellow;}
+        else operatorResponse = (int)vHOperatorResponsesEnum.undefined;
+
+        if (operatorResponse == vHColorTextIndexes[vHColorTextIndexes.Count - 1]) Debug.Log("Choice Correct");
+        else Debug.Log("Choice wrong");
     }
 
     IEnumerator ReEnableNewTrial()
@@ -80,7 +123,7 @@ public class ScriptHandler : MonoBehaviour
         startNewTrialEnabled = true;
 
     }
-    private void ColorVisionHeavyChoices()
+    private void ColorVHChoices()
     {
         vHChoices[0].GetComponent<Renderer>().material.color = Color.red;
         vHChoices[1].GetComponent<Renderer>().material.color = Color.green;
